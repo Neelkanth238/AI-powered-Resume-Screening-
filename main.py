@@ -88,13 +88,13 @@ st.markdown(
     unsafe_allow_html=True,
 )
 
-# Set the app title
+# Setting the app title
 st.title("AI-powered Resume Screening System")
 st.text("Is your resume good enough?")
 st.text("A free and fast AI resume checker doing crucial checks to ensure your resume is ready for interviews.")
 
 
-# Function to extract text from PDF
+# extracting text from PDF
 def extract_text_from_pdf(file):
     pdf_reader = PyPDF2.PdfReader(file)
     text = ""
@@ -103,13 +103,13 @@ def extract_text_from_pdf(file):
     return text
 
 
-# Function to extract text from DOCX
+# extracting text from DOCX
 def extract_text_from_docx(file):
     doc = docx.Document(file)
     return " ".join([paragraph.text for paragraph in doc.paragraphs])
 
 
-# Preprocess Text: Remove unwanted characters/whitespaces
+# Remove unwanted characters/whitespaces
 def preprocess_text(text):
     text = re.sub(r"[^a-zA-Z0-9\s.,]", "", text)
     text = re.sub(r"\s+", " ", text.strip())
@@ -138,12 +138,10 @@ job_description = st.sidebar.text_area("Enter or paste Job Description below:",
 st.sidebar.title("Upload Resumes")
 uploaded_files = st.sidebar.file_uploader("Upload multiple resumes", type=["pdf", "docx"], accept_multiple_files=True)
 
-# Sidebar for adjustable weights
 similarity_weight = st.sidebar.slider("Weight for Similarity Score (%)", 0, 100, 70,
                                       help="Adjust slider to change the importance of Similarity Score.")
 match_weight = 100 - similarity_weight  # Ensure weights sum to 100
 
-# Button to process the resumes
 rank_resumes = st.sidebar.button("Rank Resumes")
 
 if rank_resumes:
@@ -153,12 +151,10 @@ if rank_resumes:
         resume_texts = []
         progress_bar = st.progress(0)  # Progress indicator
 
-        # Preprocess and extract keywords from Job Description
         job_description = preprocess_text(job_description)
         jd_keywords = extract_keywords(job_description)
 
         for idx, uploaded_file in enumerate(uploaded_files):
-            # Extract text based on file type
             if uploaded_file.name.endswith(".pdf"):
                 text = preprocess_text(extract_text_from_pdf(uploaded_file))
             elif uploaded_file.name.endswith(".docx"):
@@ -167,7 +163,6 @@ if rank_resumes:
                 st.error(f"Unsupported file format: {uploaded_file.name}")
                 continue
 
-            # Truncate long resumes
             max_characters = 5000
             if len(text) > max_characters:
                 text = text[:max_characters]
@@ -175,7 +170,6 @@ if rank_resumes:
 
             resume_texts.append(text)
 
-            # Update progress bar
             progress_bar.progress((idx + 1) / len(uploaded_files))
 
         # Calculate Similarity Scores
